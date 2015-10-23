@@ -40,6 +40,10 @@ public class MainActivity extends AppCompatActivity {
             ex.printStackTrace();
         }
 
+        if (!isCameraLightOn(mCamera)) {
+            turnLightStatus(mCamera,true);
+        }
+
         ToggleButton toggle = (ToggleButton) findViewById(R.id.toggleButton);
         toggle.setChecked(isCameraLightOn(mCamera));
         toggle.setOnClickListener(new View.OnClickListener() {

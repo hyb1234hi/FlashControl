@@ -17,7 +17,16 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    Camera mCamera = Camera.open();
+    private Camera mCamera;
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mCamera.stopPreview();
+        mCamera.release();
+        mCamera = null;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -25,24 +34,21 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+        try {
+            mCamera = Camera.open();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
 
         ToggleButton toggle = (ToggleButton) findViewById(R.id.toggleButton);
-        toggle.setChecked(true);
+        toggle.setChecked(isCameraLightOn(mCamera));
         toggle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 ToggleButton button = (ToggleButton)view;
                 Log.d("button","ToggleButton clicked");
 
-                turnLightStatus(mCamera,!button.isChecked());
+                turnLightStatus(mCamera,button.isChecked());
             }
         });
     }
@@ -67,6 +73,13 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public static boolean isCameraLightOn(Camera camera) {
+        if (camera == null) {
+            return false;
+        }
+        return camera.getParameters().getFlashMode().equals(camera.getParameters().FLASH_MODE_TORCH);
     }
 
     public static void turnLightStatus(Camera camera, boolean turnOn) {
